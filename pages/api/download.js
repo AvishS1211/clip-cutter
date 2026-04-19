@@ -37,8 +37,12 @@ function toNetscape(cookies) {
 function writeCookiesFile() {
   const cookies = process.env.YOUTUBE_COOKIES;
   if (!cookies) return null;
+  const trimmed = cookies.trim();
+  console.log('[cookies] raw starts with:', trimmed.slice(0, 80));
+  const converted = toNetscape(trimmed);
+  console.log('[cookies] converted starts with:', converted.slice(0, 80));
   const cookiePath = path.join(os.tmpdir(), 'yt-cookies.txt');
-  fs.writeFileSync(cookiePath, toNetscape(cookies.trim()), 'utf8');
+  fs.writeFileSync(cookiePath, converted, 'utf8');
   return cookiePath;
 }
 
