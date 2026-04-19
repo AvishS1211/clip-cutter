@@ -263,7 +263,7 @@ export default function Home() {
               </div>
               <div className="progress-label">
                 <span>{downloadStage === 'processing' ? 'Processing...' : `Downloading ${Math.round(downloadProgress)}%`}</span>
-                <span>{Math.round(downloadProgress)}%</span>
+                <span>100%</span>
               </div>
             </div>
           )}

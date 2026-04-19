@@ -72,13 +72,17 @@ export default function handler(req, res) {
   const proc = spawn('yt-dlp', args);
   let stderr = '';
 
-  proc.stdout.on('data', (chunk) => {
-    const line = chunk.toString();
-    const match = line.match(/\[download\]\s+(\d+\.?\d*)%/);
+  const parseProgress = (chunk) => {
+    const text = chunk.toString();
+    const match = text.match(/\[download\]\s+(\d+\.?\d*)%/);
     if (match) send({ progress: parseFloat(match[1]) });
-  });
+  };
 
-  proc.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+  proc.stdout.on('data', parseProgress);
+  proc.stderr.on('data', (chunk) => {
+    parseProgress(chunk);
+    stderr += chunk.toString();
+  });
 
   proc.on('close', async (code) => {
     if (code !== 0) {
