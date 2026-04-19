@@ -2,10 +2,13 @@
   "name": "clip-cutter",
   "version": "1.0.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p 3456",
+    "electron:dev": "concurrently \"next dev -p 3456\" \"wait-on http://localhost:3456 && NODE_ENV=development electron .\"",
+    "electron:build": "next build && node scripts/prepare-electron.js && electron-builder"
   },
   "dependencies": {
     "next": "^14.0.0",
@@ -14,5 +17,48 @@
     "axios": "^1.6.0",
     "fluent-ffmpeg": "^2.1.2",
     "nanoid": "^4.0.2"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0",
+    "concurrently": "^8.0.0",
+    "wait-on": "^7.0.0"
+  },
+  "build": {
+    "appId": "com.clipcutter.app",
+    "productName": "Clip Cutter",
+    "asar": true,
+    "files": [
+      "electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "server",
+        "filter": ["**/*"]
+      },
+      {
+        "from": ".next/static",
+        "to": "server/.next/static",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "public",
+        "to": "server/public",
+        "filter": ["**/*"]
+      }
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.video",
+      "icon": "electron/icon.icns"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "electron/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
