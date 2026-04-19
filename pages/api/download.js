@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const execAsync = promisify(exec);
 
@@ -13,6 +14,14 @@ export const config = {
     bodyParser: { sizeLimit: '1mb' },
   },
 };
+
+function writeCookiesFile() {
+  const cookies = process.env.YOUTUBE_COOKIES;
+  if (!cookies) return null;
+  const cookiePath = path.join(os.tmpdir(), 'yt-cookies.txt');
+  fs.writeFileSync(cookiePath, cookies, 'utf8');
+  return cookiePath;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -26,9 +35,12 @@ export default async function handler(req, res) {
   const fileName = `video-${timestamp}.mp4`;
   const filePath = path.join(TMP_DIR, fileName);
 
+  const cookiePath = writeCookiesFile();
+  const cookieFlag = cookiePath ? `--cookies "${cookiePath}"` : '';
+
   try {
     await execAsync(
-      `yt-dlp -f "best[ext=mp4]/best" --extractor-args "youtube:player_client=android,web" --no-check-certificates -o "${filePath}" "${url}"`,
+      `yt-dlp -f "best[ext=mp4]/best" ${cookieFlag} --no-check-certificates -o "${filePath}" "${url}"`,
       { timeout: 300000 }
     );
 
