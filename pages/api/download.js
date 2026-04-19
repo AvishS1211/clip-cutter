@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
   try {
     await execAsync(
-      `yt-dlp -f "best[ext=mp4]/best" -o "${filePath}" "${url}"`,
+      `yt-dlp -f "best[ext=mp4]/best" --extractor-args "youtube:player_client=android,web" --no-check-certificates -o "${filePath}" "${url}"`,
       { timeout: 300000 }
     );
 
