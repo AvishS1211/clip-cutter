@@ -15,11 +15,30 @@ export const config = {
   },
 };
 
+function toNetscape(cookies) {
+  try {
+    const parsed = JSON.parse(cookies);
+    if (!Array.isArray(parsed)) return cookies;
+    const lines = ['# Netscape HTTP Cookie File'];
+    for (const c of parsed) {
+      const domain = c.domain || '';
+      const flag = domain.startsWith('.') ? 'TRUE' : 'FALSE';
+      const path_ = c.path || '/';
+      const secure = c.secure ? 'TRUE' : 'FALSE';
+      const expiry = c.expirationDate ? Math.floor(c.expirationDate) : 0;
+      lines.push(`${domain}\t${flag}\t${path_}\t${secure}\t${expiry}\t${c.name}\t${c.value}`);
+    }
+    return lines.join('\n');
+  } catch {
+    return cookies;
+  }
+}
+
 function writeCookiesFile() {
   const cookies = process.env.YOUTUBE_COOKIES;
   if (!cookies) return null;
   const cookiePath = path.join(os.tmpdir(), 'yt-cookies.txt');
-  fs.writeFileSync(cookiePath, cookies, 'utf8');
+  fs.writeFileSync(cookiePath, toNetscape(cookies.trim()), 'utf8');
   return cookiePath;
 }
 
