@@ -1,0 +1,226 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #F9F6F2;
+  color: #1C1917;
+}
+
+.container { max-width: 780px; margin: 0 auto; padding: 48px 24px; }
+
+/* Header */
+.header { margin-bottom: 40px; display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  width: 32px; height: 32px;
+  background: #CC785C;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.header-logo svg { width: 18px; height: 18px; }
+.header h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: #1C1917;
+  letter-spacing: -0.3px;
+}
+.header-sub { font-size: 13px; color: #A8A29E; margin-top: 1px; }
+
+/* Cards */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #EDE8E3;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* URL row */
+.url-row { display: flex; gap: 10px; }
+.url-input {
+  flex: 1; height: 44px;
+  border: 1px solid #EDE8E3;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  color: #1C1917;
+  background: #FDFCFB;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.url-input:focus { border-color: #CC785C; background: #fff; }
+.url-input::placeholder { color: #C4BFBB; }
+
+/* Buttons */
+.btn {
+  height: 44px; padding: 0 20px;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer; border: none;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { opacity: 0.88; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: #CC785C; color: #fff; }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #EDE8E3;
+  color: #57534E;
+}
+.btn-ghost:hover { background: #F5F1ED; opacity: 1; }
+
+/* Status */
+.status { font-size: 13px; color: #A8A29E; margin-top: 10px; min-height: 18px; }
+.status.error { color: #DC2626; }
+
+/* Video */
+video { width: 100%; border-radius: 10px; background: #0C0A09; display: block; max-height: 400px; }
+
+/* Time controls */
+.time-controls {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px; margin-top: 20px;
+}
+.time-cell { text-align: center; }
+.time-label {
+  font-size: 10px; font-weight: 500;
+  color: #A8A29E;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+.time-value-display {
+  font-family: 'Inter', monospace;
+  font-size: 20px; font-weight: 500;
+  color: #1C1917;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+.time-value-display.green { color: #16A34A; }
+.time-value-display.red { color: #DC2626; }
+.time-value-display.muted { color: #78716C; }
+
+/* Editable timestamp input */
+.timestamp-input {
+  font-family: 'Inter', monospace;
+  font-size: 20px; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  border: none; outline: none;
+  background: transparent;
+  text-align: center;
+  width: 100%;
+  padding: 2px 4px;
+  border-radius: 6px;
+  cursor: text;
+  transition: background 0.15s;
+}
+.timestamp-input.green { color: #16A34A; }
+.timestamp-input.red { color: #DC2626; }
+.timestamp-input:focus {
+  background: #F5F1ED;
+  cursor: text;
+}
+.timestamp-input::selection { background: #CC785C33; }
+
+.time-set-btn {
+  display: block; width: 100%;
+  margin-top: 8px; height: 30px;
+  font-size: 12px; border-radius: 7px;
+  padding: 0;
+}
+
+/* Divider */
+.divider { border: none; border-top: 1px solid #EDE8E3; margin: 20px 0; }
+
+/* Timeline */
+.timeline-wrap { margin-top: 4px; }
+.timeline-label {
+  font-size: 10px; font-weight: 500;
+  color: #A8A29E; text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 10px;
+}
+.timeline {
+  height: 6px; background: #EDE8E3;
+  border-radius: 3px; cursor: pointer;
+  position: relative; overflow: visible;
+  user-select: none;
+}
+.timeline-region {
+  position: absolute; top: 0; height: 100%;
+  background: #CC785C22; pointer-events: none;
+}
+.timeline-progress {
+  position: absolute; left: 0; top: 0; height: 100%;
+  background: #CC785C; border-radius: 3px;
+  pointer-events: none;
+}
+.timeline-in {
+  position: absolute; top: -5px;
+  width: 3px; height: 16px;
+  background: #16A34A; border-radius: 2px;
+  transform: translateX(-50%); pointer-events: none;
+}
+.timeline-out {
+  position: absolute; top: -5px;
+  width: 3px; height: 16px;
+  background: #DC2626; border-radius: 2px;
+  transform: translateX(-50%); pointer-events: none;
+}
+.time-display {
+  display: flex; justify-content: space-between;
+  margin-top: 8px; font-size: 11px;
+  color: #A8A29E; font-variant-numeric: tabular-nums;
+}
+
+/* Export */
+.export-btn {
+  width: 100%; margin-top: 4px;
+  height: 46px; font-size: 14px;
+  font-weight: 500; letter-spacing: 0.1px;
+}
+.export-status {
+  font-size: 13px; margin-top: 10px;
+  min-height: 18px; text-align: center; color: #A8A29E;
+}
+.export-status.success { color: #16A34A; }
+.export-status.error { color: #DC2626; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(28,25,23,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; backdrop-filter: blur(2px);
+}
+.modal {
+  background: #fff;
+  border-radius: 16px; padding: 28px;
+  width: 360px;
+  border: 1px solid #EDE8E3;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+}
+.modal h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 20px; font-weight: 400;
+  margin-bottom: 16px; color: #1C1917;
+}
+.modal input {
+  width: 100%; height: 44px;
+  border: 1px solid #EDE8E3;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none; background: #FDFCFB;
+  transition: border-color 0.15s;
+}
+.modal input:focus { border-color: #CC785C; background: #fff; }
+.modal-hint { font-size: 12px; color: #C4BFBB; margin-top: 6px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .btn { flex: 1; }
