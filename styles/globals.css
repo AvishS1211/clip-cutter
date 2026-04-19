@@ -78,6 +78,11 @@ body {
 .status { font-size: 13px; color: #A8A29E; margin-top: 10px; min-height: 18px; }
 .status.error { color: #DC2626; }
 
+.progress-wrap { margin-top: 14px; }
+.progress-bar { height: 4px; background: #EDE8E3; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #CC785C; border-radius: 2px; transition: width 0.4s ease; }
+.progress-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #A8A29E; }
+
 /* Video */
 video { width: 100%; border-radius: 10px; background: #0C0A09; display: block; max-height: 400px; }
 

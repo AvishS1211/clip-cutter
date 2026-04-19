@@ -1,18 +1,14 @@
-import { exec } from 'child_process';
+import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
 const execAsync = promisify(exec);
-
 const TMP_DIR = '/tmp/clip-cutter-videos';
 
 export const config = {
-  api: {
-    responseLimit: false,
-    bodyParser: { sizeLimit: '1mb' },
-  },
+  api: { responseLimit: false, bodyParser: { sizeLimit: '1mb' } },
 };
 
 function toNetscape(cookies) {
@@ -23,10 +19,9 @@ function toNetscape(cookies) {
     for (const c of parsed) {
       const domain = c.domain || '';
       const flag = domain.startsWith('.') ? 'TRUE' : 'FALSE';
-      const path_ = c.path || '/';
       const secure = c.secure ? 'TRUE' : 'FALSE';
       const expiry = c.expirationDate ? Math.floor(c.expirationDate) : 0;
-      lines.push(`${domain}\t${flag}\t${path_}\t${secure}\t${expiry}\t${c.name}\t${c.value}`);
+      lines.push(`${domain}\t${flag}\t${c.path || '/'}\t${secure}\t${expiry}\t${c.name}\t${c.value}`);
     }
     return lines.join('\n');
   } catch {
@@ -38,53 +33,77 @@ function writeCookiesFile() {
   const cookies = process.env.YOUTUBE_COOKIES;
   if (!cookies) return null;
   const trimmed = cookies.trim();
-  console.log('[cookies] raw starts with:', trimmed.slice(0, 80));
   const converted = toNetscape(trimmed);
-  console.log('[cookies] converted starts with:', converted.slice(0, 80));
   const cookiePath = path.join(os.tmpdir(), 'yt-cookies.txt');
   fs.writeFileSync(cookiePath, converted, 'utf8');
   return cookiePath;
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+export default function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
 
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'URL is required' });
 
   if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
 
-  const timestamp = Date.now();
-  const fileName = `video-${timestamp}.mp4`;
+  const fileName = `video-${Date.now()}.mp4`;
   const filePath = path.join(TMP_DIR, fileName);
 
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (data) => {
+    if (!res.writableEnded) res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
   const cookiePath = writeCookiesFile();
-  const cookieFlag = cookiePath ? `--cookies "${cookiePath}"` : '';
+  const args = [
+    '-f', 'best[ext=mp4]/best',
+    '--newline',
+    '--no-check-certificates',
+    '-o', filePath,
+  ];
+  if (cookiePath) args.push('--cookies', cookiePath);
+  args.push(url);
 
-  try {
-    await execAsync(
-      `yt-dlp -f "best[ext=mp4]/best" ${cookieFlag} --no-check-certificates -o "${filePath}" "${url}"`,
-      { timeout: 300000 }
-    );
+  const proc = spawn('yt-dlp', args);
+  let stderr = '';
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(500).json({ error: 'Download failed — file not found after yt-dlp' });
+  proc.stdout.on('data', (chunk) => {
+    const line = chunk.toString();
+    const match = line.match(/\[download\]\s+(\d+\.?\d*)%/);
+    if (match) send({ progress: parseFloat(match[1]) });
+  });
+
+  proc.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+
+  proc.on('close', async (code) => {
+    if (code !== 0) {
+      send({ error: stderr.split('\n').filter(l => l.includes('ERROR')).pop() || 'Download failed' });
+      res.end();
+      return;
     }
 
-    const { stdout: probeOut } = await execAsync(
-      `ffprobe -v quiet -print_format json -show_format "${filePath}"`
-    );
-    const probe = JSON.parse(probeOut);
-    const duration = parseFloat(probe.format?.duration || 0);
+    send({ progress: 100, stage: 'processing' });
 
-    return res.status(200).json({
-      success: true,
-      path: `/api/stream?file=${fileName}`,
-      duration,
-      fileName,
-    });
-  } catch (err) {
-    console.error('Download error:', err.message);
-    return res.status(500).json({ error: err.message || 'Download failed' });
-  }
+    try {
+      const { stdout } = await execAsync(
+        `ffprobe -v quiet -print_format json -show_format "${filePath}"`
+      );
+      const probe = JSON.parse(stdout);
+      const duration = parseFloat(probe.format?.duration || 0);
+      send({ success: true, path: `/api/stream?file=${fileName}`, duration, fileName });
+    } catch {
+      send({ error: 'Failed to read video metadata' });
+    }
+
+    res.end();
+  });
+
+  req.on('close', () => {
+    if (proc && !proc.killed) proc.kill();
+  });
 }

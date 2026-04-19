@@ -74,6 +74,8 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState(0);
   const [inPoint, setInPoint] = useState(0);
   const [outPoint, setOutPoint] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadStage, setDownloadStage] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -84,21 +86,53 @@ export default function Home() {
   const handleDownload = async () => {
     if (!url.trim()) return;
     setLoading(true);
-    setStatus('Downloading...');
+    setStatus('');
+    setDownloadProgress(0);
+    setDownloadStage('download');
     setVideoSrc('');
     setExportStatus('');
+
     try {
-      const res = await axios.post('/api/download', { url: url.trim() });
-      const { path, duration: dur } = res.data;
-      setVideoSrc(path);
-      setDuration(dur);
-      setInPoint(0);
-      setOutPoint(dur);
-      setStatus('');
+      const response = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.progress !== undefined) setDownloadProgress(data.progress);
+            if (data.stage === 'processing') setDownloadStage('processing');
+            if (data.success) {
+              setVideoSrc(data.path);
+              setDuration(data.duration);
+              setInPoint(0);
+              setOutPoint(data.duration);
+              setDownloadStage('');
+            }
+            if (data.error) setStatus(`✗ ${data.error}`);
+          } catch {}
+        }
+      }
     } catch (err) {
-      setStatus(`✗ ${err.response?.data?.error || 'Download failed'}`);
+      setStatus(`✗ ${err.message || 'Download failed'}`);
     } finally {
       setLoading(false);
+      setDownloadProgress(0);
     }
   };
 
@@ -222,7 +256,18 @@ export default function Home() {
               {loading ? 'Downloading...' : 'Download'}
             </button>
           </div>
-          {status && (
+          {loading && (
+            <div className="progress-wrap">
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: `${downloadProgress}%` }} />
+              </div>
+              <div className="progress-label">
+                <span>{downloadStage === 'processing' ? 'Processing...' : `Downloading ${Math.round(downloadProgress)}%`}</span>
+                <span>{Math.round(downloadProgress)}%</span>
+              </div>
+            </div>
+          )}
+          {status && !loading && (
             <p className={`status ${status.startsWith('✗') ? 'error' : ''}`}>{status}</p>
           )}
         </div>
