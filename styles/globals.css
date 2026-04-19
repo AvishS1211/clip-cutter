@@ -158,7 +158,9 @@ video { width: 100%; border-radius: 10px; background: #0C0A09; display: block; m
 }
 .timeline-region {
   position: absolute; top: 0; height: 100%;
-  background: #CC785C22; pointer-events: none;
+  background: #16A34A55;
+  border-top: none;
+  pointer-events: none;
 }
 .timeline-progress {
   position: absolute; left: 0; top: 0; height: 100%;
@@ -166,16 +168,18 @@ video { width: 100%; border-radius: 10px; background: #0C0A09; display: block; m
   pointer-events: none;
 }
 .timeline-in {
-  position: absolute; top: -5px;
-  width: 3px; height: 16px;
+  position: absolute; top: -7px;
+  width: 3px; height: 20px;
   background: #16A34A; border-radius: 2px;
   transform: translateX(-50%); pointer-events: none;
+  box-shadow: 0 0 4px rgba(22,163,74,0.5);
 }
 .timeline-out {
-  position: absolute; top: -5px;
-  width: 3px; height: 16px;
+  position: absolute; top: -7px;
+  width: 3px; height: 20px;
   background: #DC2626; border-radius: 2px;
   transform: translateX(-50%); pointer-events: none;
+  box-shadow: 0 0 4px rgba(220,38,38,0.5);
 }
 .time-display {
   display: flex; justify-content: space-between;

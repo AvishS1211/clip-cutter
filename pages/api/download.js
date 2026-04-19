@@ -70,6 +70,9 @@ export default function handler(req, res) {
     '-f', 'best[ext=mp4]/best',
     '--newline',
     '--no-check-certificates',
+    '--concurrent-fragments', '5',
+    '--external-downloader', 'aria2c',
+    '--external-downloader-args', 'aria2c:-x 16 -s 16 -k 1M --min-split-size=1M',
     '-o', filePath,
   ];
   if (cookiePath) args.push('--cookies', cookiePath);
