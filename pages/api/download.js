@@ -51,12 +51,18 @@ export default function handler(req, res) {
   const filePath = path.join(TMP_DIR, fileName);
 
   res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.setHeader('Content-Encoding', 'none');
+  if (res.socket) res.socket.setNoDelay(true);
   res.flushHeaders();
 
   const send = (data) => {
-    if (!res.writableEnded) res.write(`data: ${JSON.stringify(data)}\n\n`);
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+      if (typeof res.flush === 'function') res.flush();
+    }
   };
 
   const cookiePath = writeCookiesFile();
