@@ -226,25 +226,59 @@ export default function Home() {
   const clipDuration = outPoint - inPoint;
 
   return (
-    <>
-      <div className="container">
-        <div className="header">
+    <div className="app-shell">
+
+      {/* ── Left: Video Panel ── */}
+      <div className="video-panel">
+        {videoSrc ? (
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            controls
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={() => {
+              if (videoRef.current) {
+                const d = videoRef.current.duration;
+                if (d && !isNaN(d)) { setDuration(d); setOutPoint(d); }
+              }
+            }}
+          />
+        ) : (
+          <div className="video-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3D3B37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+              <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+              <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+              <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+            </svg>
+            <p>Paste a link and hit Download</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Right: Control Panel ── */}
+      <div className="control-panel">
+
+        {/* Header */}
+        <div className="ctrl-header">
           <div className="header-logo">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-  <circle cx="6" cy="6" r="3"/>
-  <circle cx="6" cy="18" r="3"/>
-  <line x1="20" y1="4" x2="8.12" y2="15.88"/>
-  <line x1="14.47" y1="14.48" x2="20" y2="20"/>
-  <line x1="8.12" y1="8.12" x2="12" y2="12"/>
-</svg>
+              <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+              <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+              <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+              <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+            </svg>
           </div>
           <div>
             <h1>Clip Cutter</h1>
-            <div className="header-sub">Extract clips from any video URL</div>
+            <div className="header-sub">YouTube · X · Broadcasts</div>
           </div>
         </div>
 
-        <div className="card">
+        <hr className="divider" />
+
+        {/* URL Input */}
+        <div className="ctrl-section">
           <div className="url-row">
             <input
               className="url-input"
@@ -254,14 +288,15 @@ export default function Home() {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !loading && handleDownload()}
             />
-            <button
-              className="btn btn-primary"
-              onClick={handleDownload}
-              disabled={loading || !url.trim()}
-            >
-              {loading ? 'Downloading...' : 'Download'}
-            </button>
           </div>
+          <button
+            className="btn btn-primary"
+            style={{ width: '100%', marginTop: 10 }}
+            onClick={handleDownload}
+            disabled={loading || !url.trim()}
+          >
+            {loading ? 'Downloading...' : 'Download'}
+          </button>
           {loading && (
             <div className="progress-wrap">
               <div className="progress-bar">
@@ -279,50 +314,33 @@ export default function Home() {
         </div>
 
         {videoSrc && (
-          <div className="card">
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              controls
-              onTimeUpdate={handleTimeUpdate}
-              onLoadedMetadata={() => {
-                if (videoRef.current) {
-                  const d = videoRef.current.duration;
-                  if (d && !isNaN(d)) { setDuration(d); setOutPoint(d); }
-                }
-              }}
-            />
+          <>
+            <hr className="divider" />
 
-            <div className="time-controls">
-              <div className="time-cell">
-                <div className="time-label">Mark In</div>
-                <TimestampInput
-                  value={inPoint}
-                  onChange={handleInChange}
-                  className="green"
-                  max={outPoint - 0.1}
-                />
-                <button className="btn btn-ghost time-set-btn" onClick={handleSetIn}>Set In</button>
-              </div>
-              <div className="time-cell">
-                <div className="time-label">Duration</div>
-                <span className="time-value-display muted">{formatTime(clipDuration)}</span>
-              </div>
-              <div className="time-cell">
-                <div className="time-label">Mark Out</div>
-                <TimestampInput
-                  value={outPoint}
-                  onChange={handleOutChange}
-                  className="red"
-                  max={duration}
-                />
-                <button className="btn btn-ghost time-set-btn" onClick={handleSetOut}>Set Out</button>
+            {/* In / Duration / Out */}
+            <div className="ctrl-section">
+              <div className="time-controls">
+                <div className="time-cell">
+                  <div className="time-label">Mark In</div>
+                  <TimestampInput value={inPoint} onChange={handleInChange} className="green" max={outPoint - 0.1} />
+                  <button className="btn btn-ghost time-set-btn" onClick={handleSetIn}>Set In</button>
+                </div>
+                <div className="time-cell">
+                  <div className="time-label">Duration</div>
+                  <span className="time-value-display muted">{formatTime(clipDuration)}</span>
+                </div>
+                <div className="time-cell">
+                  <div className="time-label">Mark Out</div>
+                  <TimestampInput value={outPoint} onChange={handleOutChange} className="red" max={duration} />
+                  <button className="btn btn-ghost time-set-btn" onClick={handleSetOut}>Set Out</button>
+                </div>
               </div>
             </div>
 
             <hr className="divider" />
 
-            <div className="timeline-wrap">
+            {/* Timeline */}
+            <div className="ctrl-section">
               <div className="timeline-label">Timeline</div>
               <div
                 className="timeline"
@@ -331,13 +349,7 @@ export default function Home() {
               >
                 {duration > 0 && (
                   <>
-                    <div
-                      className="timeline-region"
-                      style={{
-                        left: `${getTimelinePercent(inPoint)}%`,
-                        width: `${getTimelinePercent(outPoint) - getTimelinePercent(inPoint)}%`,
-                      }}
-                    />
+                    <div className="timeline-region" style={{ left: `${getTimelinePercent(inPoint)}%`, width: `${getTimelinePercent(outPoint) - getTimelinePercent(inPoint)}%` }} />
                     <div className="timeline-progress" style={{ width: `${getTimelinePercent(currentTime)}%` }} />
                     <div className="timeline-in" style={{ left: `${getTimelinePercent(inPoint)}%` }} />
                     <div className="timeline-out" style={{ left: `${getTimelinePercent(outPoint)}%` }} />
@@ -350,23 +362,22 @@ export default function Home() {
               </div>
             </div>
 
-            <button
-              className="btn btn-primary export-btn"
-              onClick={handleExportClick}
-              disabled={exporting}
-            >
-              {exporting ? 'Exporting...' : 'Export Clip'}
-            </button>
+            <hr className="divider" />
 
-            {exportStatus && (
-              <p className={`export-status ${exportStatus.startsWith('✓') ? 'success' : exportStatus.startsWith('✗') ? 'error' : ''}`}>
-                {exportStatus}
-              </p>
-            )}
-          </div>
+            {/* Export */}
+            <div className="ctrl-section">
+              <button className="btn btn-primary export-btn" onClick={handleExportClick} disabled={exporting}>
+                {exporting ? 'Exporting...' : 'Export Clip'}
+              </button>
+              {exportStatus && (
+                <p className={`export-status ${exportStatus.startsWith('✓') ? 'success' : exportStatus.startsWith('✗') ? 'error' : ''}`}>
+                  {exportStatus}
+                </p>
+              )}
+            </div>
+          </>
         )}
       </div>
-
-    </>
+    </div>
   );
 }
