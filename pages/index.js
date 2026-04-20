@@ -2,21 +2,23 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
 function formatTime(seconds) {
-  if (seconds === undefined || seconds === null || isNaN(seconds)) return '0:00';
+  if (seconds === undefined || seconds === null || isNaN(seconds)) return '0:00:00:000';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  const ms = Math.floor((seconds % 1) * 1000);
+  return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:${ms.toString().padStart(3, '0')}`;
 }
 
 function parseTime(str) {
-  const parts = str.trim().split(':').map(Number);
-  if (parts.some(isNaN)) return null;
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  return null;
+  // Accepts H:MM:SS:mmm  or  H:MM:SS  or  M:SS  or  plain seconds
+  const parts = str.trim().split(':');
+  if (parts.some(p => isNaN(Number(p)))) return null;
+  const nums = parts.map(Number);
+  if (nums.length === 4) return nums[0] * 3600 + nums[1] * 60 + nums[2] + nums[3] / 1000;
+  if (nums.length === 3) return nums[0] * 3600 + nums[1] * 60 + nums[2];
+  if (nums.length === 2) return nums[0] * 60 + nums[1];
+  return nums[0];
 }
 
 function TimestampInput({ value, onChange, className, max }) {
