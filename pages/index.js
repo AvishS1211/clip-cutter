@@ -243,7 +243,7 @@ export default function Home() {
             <input
               className="url-input"
               type="text"
-              placeholder="Paste a YouTube, X, or any video URL..."
+              placeholder="Paste YouTube, X and X broadcast link..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !loading && handleDownload()}
