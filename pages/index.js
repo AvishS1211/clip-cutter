@@ -81,9 +81,30 @@ export default function Home() {
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [bottomHeight, setBottomHeight] = useState(120);
+  const [isResizing, setIsResizing] = useState(false);
 
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
+
+  const handleResizeStart = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startY = e.clientY;
+    const startHeight = bottomHeight;
+
+    const onMove = (e) => {
+      const delta = startY - e.clientY;
+      setBottomHeight(Math.min(320, Math.max(100, startHeight + delta)));
+    };
+    const onUp = () => {
+      setIsResizing(false);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
   const handleDownload = async () => {
     if (!url.trim()) return;
@@ -303,9 +324,16 @@ export default function Home() {
         )}
       </div>
 
+      {/* ── Resize Handle ── */}
+      {videoSrc && (
+        <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
+          <div className="resize-grip" />
+        </div>
+      )}
+
       {/* ── Bottom Bar ── */}
       {videoSrc && (
-        <div className="bottom-bar">
+        <div className="bottom-bar" style={{ height: bottomHeight }}>
 
           {/* Timeline row */}
           <div className="timeline-row">
