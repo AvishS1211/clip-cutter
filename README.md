@@ -1,8 +1,10 @@
 # Clip Cutter
 
-Extract clips from any video URL — YouTube, X, news, and more.
+Extract clips from any video URL — YouTube, X, X broadcasts, and more.
 
-## Quick Start (Mac)
+---
+
+## Quick Start — Mac
 
 ```bash
 git clone https://github.com/AvishS1211/clip-cutter.git
@@ -10,27 +12,69 @@ cd clip-cutter
 bash setup.sh
 ```
 
-That's it. The script installs everything and opens the app at `http://localhost:3000`.
+---
 
-## What it installs
+## Quick Start — Windows
 
-- `ffmpeg` — video processing
-- `yt-dlp` — video downloading
-- `aria2` — fast parallel downloads
-- `node` — if not already installed
+1. Open **PowerShell as Administrator** (right-click → Run as Administrator)
+2. Run:
 
-Nothing is installed globally that you don't already have. All checks run before installing.
+```powershell
+git clone https://github.com/AvishS1211/clip-cutter.git
+cd clip-cutter
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\setup-windows.ps1
+```
+
+> **Note:** `Set-ExecutionPolicy` is needed to allow the script to run. It only applies to the current session.
+
+---
+
+## What gets installed
+
+| Package | Purpose |
+|---|---|
+| **Node.js** | Runs the app |
+| **ffmpeg** | Trims and exports clips |
+| **yt-dlp** | Downloads videos from URLs |
+| **aria2** | Fast parallel downloads |
+
+All checks run before installing — nothing gets overwritten if already installed.
+
+---
+
+## Starting the app after first setup
+
+**Mac:**
+```bash
+cd clip-cutter
+npm run dev
+```
+
+**Windows:**
+```powershell
+cd clip-cutter
+npm run dev
+```
+
+Then open **http://localhost:3000** in your browser.
+
+Press `Ctrl+C` to stop.
+
+---
 
 ## Manual setup (if you prefer)
 
+**Mac:**
 ```bash
 brew install ffmpeg yt-dlp aria2
 npm install
 npm run dev
 ```
 
-## Usage
-
-1. Paste a video URL and hit Download
-2. Use the timeline to mark In and Out points
-3. Click Export Clip — MP4 downloads instantly
+**Windows** (in PowerShell as Admin):
+```powershell
+winget install OpenJS.NodeJS Gyan.FFmpeg yt-dlp.yt-dlp aria2.aria2
+npm install
+npm run dev
+```
