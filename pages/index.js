@@ -6,8 +6,8 @@ function formatTime(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  const ms = Math.floor((seconds % 1) * 1000);
-  return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:${ms.toString().padStart(3, '0')}`;
+  const cs = Math.floor((seconds % 1) * 100);
+  return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:${cs.toString().padStart(2, '0')}`;
 }
 
 function parseTime(str) {
@@ -15,7 +15,7 @@ function parseTime(str) {
   const parts = str.trim().split(':');
   if (parts.some(p => isNaN(Number(p)))) return null;
   const nums = parts.map(Number);
-  if (nums.length === 4) return nums[0] * 3600 + nums[1] * 60 + nums[2] + nums[3] / 1000;
+  if (nums.length === 4) return nums[0] * 3600 + nums[1] * 60 + nums[2] + nums[3] / 100;
   if (nums.length === 3) return nums[0] * 3600 + nums[1] * 60 + nums[2];
   if (nums.length === 2) return nums[0] * 60 + nums[1];
   return nums[0];
