@@ -330,18 +330,7 @@ export default function Home() {
           <button className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={handleDownload} disabled={loading || !url.trim()}>
             {loading ? 'Downloading...' : 'Download'}
           </button>
-          {loading && (
-            <div className="progress-wrap">
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${downloadProgress}%` }} />
-              </div>
-              <div className="progress-label">
-                <span>{downloadStage === 'processing' ? 'Processing...' : `Downloading ${Math.round(downloadProgress)}%`}</span>
-                <span>100%</span>
-              </div>
-            </div>
-          )}
-          {status && !loading && (
+{status && !loading && (
             <p className={`status ${status.startsWith('✗') ? 'error' : ''}`}>{status}</p>
           )}
         </div>
