@@ -7,95 +7,15 @@ body {
   color: #E8E3DC;
 }
 
-/* ── App shell: top bar + video + bottom bar ── */
+/* ── App shell: side-by-side ── */
 .app-shell {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   overflow: hidden;
 }
 
-/* ── Top bar ── */
-.top-bar {
-  height: 56px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
-  background: #161614;
-  border-bottom: 1px solid #2C2B28;
-}
-
-.top-bar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.header-logo {
-  width: 28px; height: 28px;
-  background: #CC785C;
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-}
-.header-logo svg { width: 15px; height: 15px; }
-
-h1 {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-size: 20px; font-weight: 400;
-  color: #F0EBE3;
-  letter-spacing: -0.3px;
-  white-space: nowrap;
-}
-
-.top-bar-url {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.url-input {
-  flex: 1; height: 36px;
-  border: 1px solid #2C2B28;
-  border-radius: 8px;
-  padding: 0 12px;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  color: #E8E3DC;
-  background: #111110;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.url-input:focus { border-color: #CC785C; }
-.url-input::placeholder { color: #3D3B37; }
-
-.status { font-size: 12px; color: #6B6560; white-space: nowrap; }
-.status.error { color: #F87171; }
-
-/* ── Buttons ── */
-.btn {
-  height: 36px; padding: 0 16px;
-  border-radius: 8px;
-  font-size: 13px; font-weight: 500;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer; border: none;
-  transition: opacity 0.15s;
-  white-space: nowrap;
-}
-.btn:hover { opacity: 0.85; }
-.btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.btn-primary { background: #CC785C; color: #fff; }
-.btn-ghost {
-  background: transparent;
-  border: 1px solid #2C2B28;
-  color: #A8A29E;
-}
-.btn-ghost:hover { background: #1C1B19; opacity: 1; }
-
-/* ── Video panel ── */
+/* ── Left: Video Panel ── */
 .video-panel {
   flex: 1;
   background: #0A0A09;
@@ -104,6 +24,7 @@ h1 {
   justify-content: center;
   overflow: hidden;
   position: relative;
+  min-width: 0;
 }
 
 .video-panel video {
@@ -128,18 +49,13 @@ h1 {
   gap: 8px;
 }
 
-/* ── Progress bar ── */
-.progress-bar { height: 3px; background: #2C2B28; border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; background: #CC785C; border-radius: 2px; transition: width 0.4s ease; }
-.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #6B6560; }
-
-/* ── Resize handle ── */
+/* ── Resize handle (vertical drag bar) ── */
 .resize-handle {
   flex-shrink: 0;
-  height: 6px;
+  width: 6px;
   background: #161614;
-  border-top: 1px solid #2C2B28;
-  cursor: ns-resize;
+  border-left: 1px solid #2C2B28;
+  cursor: ew-resize;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,7 +63,8 @@ h1 {
 }
 .resize-handle:hover, .resize-handle.resizing { background: #1E1D1B; }
 .resize-grip {
-  width: 32px; height: 2px;
+  width: 2px;
+  height: 32px;
   border-radius: 1px;
   background: #3D3B37;
   transition: background 0.15s;
@@ -155,44 +72,140 @@ h1 {
 .resize-handle:hover .resize-grip,
 .resize-handle.resizing .resize-grip { background: #CC785C; }
 
-/* ── Bottom bar ── */
-.bottom-bar {
+/* ── Right: Control Panel ── */
+.control-panel {
   flex-shrink: 0;
   background: #161614;
-  border-top: 1px solid #2C2B28;
-  padding: 12px 20px 14px;
+  border-left: 1px solid #2C2B28;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Timeline row */
-.timeline-row {
+/* Header */
+.ctrl-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-}
-
-.tl-in-out {
+  gap: 10px;
+  padding: 16px 16px 14px;
   flex-shrink: 0;
-  min-width: 90px;
 }
 
-.tl-track { flex: 1; }
+.header-logo {
+  width: 28px; height: 28px;
+  background: #CC785C;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.header-logo svg { width: 15px; height: 15px; }
+
+h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 20px; font-weight: 400;
+  color: #F0EBE3;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.header-sub {
+  font-size: 11px;
+  color: #6B6560;
+  margin-top: 1px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #2C2B28;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Sections */
+.ctrl-section {
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+
+/* ── URL Input ── */
+.url-input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #2C2B28;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: #E8E3DC;
+  background: #111110;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.url-input:focus { border-color: #CC785C; }
+.url-input::placeholder { color: #3D3B37; }
+
+.status { font-size: 12px; color: #6B6560; margin-top: 6px; }
+.status.error { color: #F87171; }
+
+/* ── Progress bar ── */
+.progress-wrap { margin-top: 8px; }
+.progress-bar { height: 3px; background: #2C2B28; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #CC785C; border-radius: 2px; transition: width 0.4s ease; }
+.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #6B6560; margin-top: 4px; }
+
+/* ── Buttons ── */
+.btn {
+  height: 36px; padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer; border: none;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-primary { background: #CC785C; color: #fff; }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #2C2B28;
+  color: #A8A29E;
+}
+.btn-ghost:hover { background: #1C1B19; opacity: 1; }
+
+/* ── Time controls ── */
+.time-controls {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.time-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
 
 .time-label {
   font-size: 9px; font-weight: 500;
   color: #6B6560;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  margin-bottom: 3px;
+}
+
+.time-set-btn {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
 }
 
 /* Editable timestamp */
 .timestamp-input {
   font-family: 'Inter', monospace;
-  font-size: 13px; font-weight: 500;
+  font-size: 12px; font-weight: 500;
   font-variant-numeric: tabular-nums;
   border: none; outline: none;
   background: transparent;
@@ -204,11 +217,19 @@ h1 {
 }
 .timestamp-input.green { color: #4ADE80; }
 .timestamp-input.red { color: #F87171; }
-.tl-in-out:last-child .timestamp-input { text-align: right; }
 .timestamp-input:focus { background: #1C1B19; }
 .timestamp-input::selection { background: #CC785C44; }
 
-/* Timeline track */
+.time-value-display {
+  font-family: 'Inter', monospace;
+  font-size: 12px; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #E8E3DC;
+  padding: 2px 2px;
+}
+.time-value-display.muted { color: #6B6560; }
+
+/* ── Timeline ── */
 .timeline {
   height: 5px; background: #2C2B28;
   border-radius: 3px; cursor: pointer;
@@ -245,32 +266,12 @@ h1 {
   color: #6B6560; font-variant-numeric: tabular-nums;
 }
 
-/* Controls row */
-.controls-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.duration-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-
-.time-value-display {
-  font-family: 'Inter', monospace;
-  font-size: 13px; font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: #E8E3DC;
-}
-.time-value-display.muted { color: #6B6560; }
-
-.export-btn { height: 36px; padding: 0 24px; }
+/* ── Export ── */
+.export-btn { width: 100%; }
 
 .export-status {
-  font-size: 12px; color: #6B6560; white-space: nowrap;
+  font-size: 12px; color: #6B6560;
+  margin-top: 8px;
 }
 .export-status.success { color: #4ADE80; }
 .export-status.error { color: #F87171; }

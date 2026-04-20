@@ -81,7 +81,7 @@ export default function Home() {
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-  const [bottomHeight, setBottomHeight] = useState(120);
+  const [panelWidth, setPanelWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
   const videoRef = useRef(null);
@@ -90,12 +90,12 @@ export default function Home() {
   const handleResizeStart = (e) => {
     e.preventDefault();
     setIsResizing(true);
-    const startY = e.clientY;
-    const startHeight = bottomHeight;
+    const startX = e.clientX;
+    const startWidth = panelWidth;
 
     const onMove = (e) => {
-      const delta = startY - e.clientY;
-      setBottomHeight(Math.min(320, Math.max(100, startHeight + delta)));
+      const delta = startX - e.clientX;
+      setPanelWidth(Math.min(480, Math.max(260, startWidth + delta)));
     };
     const onUp = () => {
       setIsResizing(false);
@@ -249,40 +249,7 @@ export default function Home() {
   return (
     <div className="app-shell">
 
-      {/* ── Top Bar ── */}
-      <div className="top-bar">
-        <div className="top-bar-brand">
-          <div className="header-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
-              <line x1="20" y1="4" x2="8.12" y2="15.88"/>
-              <line x1="14.47" y1="14.48" x2="20" y2="20"/>
-              <line x1="8.12" y1="8.12" x2="12" y2="12"/>
-            </svg>
-          </div>
-          <h1>Clip Cutter</h1>
-        </div>
-
-        <div className="top-bar-url">
-          <input
-            className="url-input"
-            type="text"
-            placeholder="Paste YouTube, X and X broadcast link..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !loading && handleDownload()}
-          />
-          <button className="btn btn-primary" onClick={handleDownload} disabled={loading || !url.trim()}>
-            {loading ? 'Downloading...' : 'Download'}
-          </button>
-        </div>
-
-        {status && !loading && (
-          <p className={`status ${status.startsWith('✗') ? 'error' : ''}`}>{status}</p>
-        )}
-      </div>
-
-      {/* ── Video Panel ── */}
+      {/* ── Left: Video Panel ── */}
       <div className="video-panel">
         {videoSrc ? (
           <video
@@ -317,7 +284,7 @@ export default function Home() {
                   <line x1="14.47" y1="14.48" x2="20" y2="20"/>
                   <line x1="8.12" y1="8.12" x2="12" y2="12"/>
                 </svg>
-                <p>Paste a link above and hit Download</p>
+                <p>Paste a link and hit Download</p>
               </>
             )}
           </div>
@@ -325,23 +292,89 @@ export default function Home() {
       </div>
 
       {/* ── Resize Handle ── */}
-      {videoSrc && (
-        <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
-          <div className="resize-grip" />
+      <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
+        <div className="resize-grip" />
+      </div>
+
+      {/* ── Right: Control Panel ── */}
+      <div className="control-panel" style={{ width: panelWidth }}>
+
+        {/* Header */}
+        <div className="ctrl-header">
+          <div className="header-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+              <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+              <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+              <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <div>
+            <h1>Clip Cutter</h1>
+            <div className="header-sub">YouTube · X · Broadcasts</div>
+          </div>
         </div>
-      )}
 
-      {/* ── Bottom Bar ── */}
-      {videoSrc && (
-        <div className="bottom-bar" style={{ height: bottomHeight }}>
+        <hr className="divider" />
 
-          {/* Timeline row */}
-          <div className="timeline-row">
-            <div className="tl-in-out">
-              <div className="time-label">In</div>
-              <TimestampInput value={inPoint} onChange={handleInChange} className="green" max={outPoint - 0.1} />
+        {/* URL Input */}
+        <div className="ctrl-section">
+          <input
+            className="url-input"
+            type="text"
+            placeholder="Paste YouTube, X and X broadcast link..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !loading && handleDownload()}
+          />
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={handleDownload} disabled={loading || !url.trim()}>
+            {loading ? 'Downloading...' : 'Download'}
+          </button>
+          {loading && (
+            <div className="progress-wrap">
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: `${downloadProgress}%` }} />
+              </div>
+              <div className="progress-label">
+                <span>{downloadStage === 'processing' ? 'Processing...' : `Downloading ${Math.round(downloadProgress)}%`}</span>
+                <span>100%</span>
+              </div>
             </div>
-            <div className="tl-track">
+          )}
+          {status && !loading && (
+            <p className={`status ${status.startsWith('✗') ? 'error' : ''}`}>{status}</p>
+          )}
+        </div>
+
+        {videoSrc && (
+          <>
+            <hr className="divider" />
+
+            {/* In / Duration / Out */}
+            <div className="ctrl-section">
+              <div className="time-controls">
+                <div className="time-cell">
+                  <div className="time-label">Mark In</div>
+                  <TimestampInput value={inPoint} onChange={handleInChange} className="green" max={outPoint - 0.1} />
+                  <button className="btn btn-ghost time-set-btn" onClick={handleSetIn}>Set In</button>
+                </div>
+                <div className="time-cell">
+                  <div className="time-label">Duration</div>
+                  <span className="time-value-display muted">{formatTime(clipDuration)}</span>
+                </div>
+                <div className="time-cell">
+                  <div className="time-label">Mark Out</div>
+                  <TimestampInput value={outPoint} onChange={handleOutChange} className="red" max={duration} />
+                  <button className="btn btn-ghost time-set-btn" onClick={handleSetOut}>Set Out</button>
+                </div>
+              </div>
+            </div>
+
+            <hr className="divider" />
+
+            {/* Timeline */}
+            <div className="ctrl-section">
+              <div className="time-label" style={{ marginBottom: 10 }}>Timeline</div>
               <div className="timeline" ref={timelineRef} onMouseDown={(e) => { setIsDragging(true); handleTimelineClick(e); }}>
                 {duration > 0 && (
                   <>
@@ -357,32 +390,23 @@ export default function Home() {
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
-            <div className="tl-in-out" style={{ textAlign: 'right' }}>
-              <div className="time-label">Out</div>
-              <TimestampInput value={outPoint} onChange={handleOutChange} className="red" max={duration} />
-            </div>
-          </div>
 
-          {/* Controls row */}
-          <div className="controls-row">
-            <button className="btn btn-ghost" onClick={handleSetIn}>Set In</button>
-            <div className="duration-display">
-              <span className="time-label">Duration</span>
-              <span className="time-value-display muted">{formatTime(clipDuration)}</span>
-            </div>
-            <button className="btn btn-ghost" onClick={handleSetOut}>Set Out</button>
-            <button className="btn btn-primary export-btn" onClick={handleExportClick} disabled={exporting}>
-              {exporting ? 'Exporting...' : 'Export Clip'}
-            </button>
-            {exportStatus && (
-              <span className={`export-status ${exportStatus.startsWith('✓') ? 'success' : exportStatus.startsWith('✗') ? 'error' : ''}`}>
-                {exportStatus}
-              </span>
-            )}
-          </div>
+            <hr className="divider" />
 
-        </div>
-      )}
+            {/* Export */}
+            <div className="ctrl-section">
+              <button className="btn btn-primary export-btn" onClick={handleExportClick} disabled={exporting}>
+                {exporting ? 'Exporting...' : 'Export Clip'}
+              </button>
+              {exportStatus && (
+                <p className={`export-status ${exportStatus.startsWith('✓') ? 'success' : exportStatus.startsWith('✗') ? 'error' : ''}`}>
+                  {exportStatus}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
