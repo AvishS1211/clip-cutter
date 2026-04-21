@@ -13,7 +13,10 @@ body {
   flex-direction: row;
   height: 100vh;
   overflow: hidden;
-  background: #0A0A09;
+  background:
+    radial-gradient(ellipse at 65% 38%, rgba(204, 120, 92, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 22% 75%, rgba(110, 70, 160, 0.13) 0%, transparent 52%),
+    #0A0A09;
   padding: 12px;
   gap: 12px;
 }
@@ -21,7 +24,7 @@ body {
 /* ── Left: Video Panel ── */
 .video-panel {
   flex: 1;
-  background: #0A0A09;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,10 +49,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background:
-    radial-gradient(ellipse at 65% 38%, rgba(204, 120, 92, 0.16) 0%, transparent 55%),
-    radial-gradient(ellipse at 22% 75%, rgba(110, 70, 160, 0.11) 0%, transparent 52%),
-    #0A0A09;
+  background: transparent;
   border-radius: 12px;
 }
 .video-placeholder p { font-size: 13px; color: #3D3B37; }
