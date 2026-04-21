@@ -67,10 +67,21 @@ function TimestampInput({ value, onChange, className, max }) {
   );
 }
 
+function Toast({ message, type, visible }) {
+  return (
+    <div className={`toast ${type} ${visible ? 'toast-visible' : ''}`}>
+      <span className="toast-icon">{type === 'success' ? '✓' : '✗'}</span>
+      {message}
+    </div>
+  );
+}
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ message: '', type: 'success', visible: false });
+  const toastTimer = useRef(null);
   const [videoSrc, setVideoSrc] = useState('');
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -86,6 +97,14 @@ export default function Home() {
 
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
+
+  const showToast = (message, type = 'success') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message, type, visible: true });
+    toastTimer.current = setTimeout(() => {
+      setToast(t => ({ ...t, visible: false }));
+    }, 3500);
+  };
 
   const handleResizeStart = (e) => {
     e.preventDefault();
@@ -238,8 +257,10 @@ export default function Home() {
       a.click();
       URL.revokeObjectURL(objectUrl);
       setExportStatus('✓ Clip downloaded!');
+      showToast('Clip exported successfully!', 'success');
     } catch (err) {
       setExportStatus(`✗ ${err.response?.data?.error || 'Export failed'}`);
+      showToast(err.response?.data?.error || 'Export failed', 'error');
     } finally {
       setExporting(false);
     }
@@ -249,6 +270,7 @@ export default function Home() {
 
   return (
     <div className="app-shell">
+      <Toast message={toast.message} type={toast.type} visible={toast.visible} />
 
       {/* ── Left: Video Panel ── */}
       <div className="video-panel">
