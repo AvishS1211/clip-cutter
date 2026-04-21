@@ -7,16 +7,18 @@ body {
   color: #E8E3DC;
 }
 
-/* ── App shell ── */
+/* ── App shell: side-by-side ── */
 .app-shell {
   display: flex;
   flex-direction: row;
   height: 100vh;
   overflow: hidden;
-  position: relative;
+  background: #0A0A09;
+  padding: 12px;
+  gap: 12px;
 }
 
-/* ── Video Panel (full canvas) ── */
+/* ── Left: Video Panel ── */
 .video-panel {
   flex: 1;
   background: #0A0A09;
@@ -26,6 +28,7 @@ body {
   overflow: hidden;
   position: relative;
   min-width: 0;
+  border-radius: 12px;
 }
 
 .video-panel video {
@@ -36,10 +39,18 @@ body {
 }
 
 .video-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 14px;
+  background:
+    radial-gradient(ellipse at 65% 38%, rgba(204, 120, 92, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse at 22% 75%, rgba(110, 70, 160, 0.11) 0%, transparent 52%),
+    #0A0A09;
+  border-radius: 12px;
 }
 .video-placeholder p { font-size: 13px; color: #3D3B37; }
 
@@ -50,19 +61,15 @@ body {
   gap: 8px;
 }
 
-/* ── Resize handle (left edge of floating panel) ── */
+/* ── Resize handle ── */
 .resize-handle {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  flex-shrink: 0;
   width: 5px;
   cursor: ew-resize;
-  border-radius: 4px 0 0 4px;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: stretch;
 }
 .resize-grip {
   width: 2px;
@@ -76,24 +83,20 @@ body {
 
 /* ── Right: Floating Control Panel ── */
 .control-panel {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  bottom: 16px;
-  background: rgba(22, 22, 20, 0.82);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  flex-shrink: 0;
+  background: rgba(22, 22, 20, 0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.55),
-    0 2px 8px rgba(0, 0, 0, 0.35),
+    0 8px 40px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  z-index: 10;
 }
 
 /* Header */

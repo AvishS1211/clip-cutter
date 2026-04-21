@@ -292,13 +292,13 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── Right: Floating Control Panel ── */}
-      <div className="control-panel" style={{ width: panelWidth, position: 'absolute' }}>
+      {/* ── Resize Handle ── */}
+      <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
+        <div className="resize-grip" />
+      </div>
 
-        {/* Resize handle on left edge of panel */}
-        <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
-          <div className="resize-grip" />
-        </div>
+      {/* ── Right: Floating Control Panel ── */}
+      <div className="control-panel" style={{ width: panelWidth }}>
 
         {/* Header */}
         <div className="ctrl-header">
