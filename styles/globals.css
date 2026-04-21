@@ -7,15 +7,16 @@ body {
   color: #E8E3DC;
 }
 
-/* ── App shell: side-by-side ── */
+/* ── App shell ── */
 .app-shell {
   display: flex;
   flex-direction: row;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
-/* ── Left: Video Panel ── */
+/* ── Video Panel (full canvas) ── */
 .video-panel {
   flex: 1;
   background: #0A0A09;
@@ -49,22 +50,23 @@ body {
   gap: 8px;
 }
 
-/* ── Resize handle (vertical drag bar) ── */
+/* ── Resize handle (left edge of floating panel) ── */
 .resize-handle {
-  flex-shrink: 0;
-  width: 6px;
-  background: #161614;
-  border-left: 1px solid #2C2B28;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
   cursor: ew-resize;
+  border-radius: 4px 0 0 4px;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
 }
-.resize-handle:hover, .resize-handle.resizing { background: #1E1D1B; }
 .resize-grip {
   width: 2px;
-  height: 32px;
+  height: 28px;
   border-radius: 1px;
   background: #3D3B37;
   transition: background 0.15s;
@@ -72,15 +74,26 @@ body {
 .resize-handle:hover .resize-grip,
 .resize-handle.resizing .resize-grip { background: #CC785C; }
 
-/* ── Right: Control Panel ── */
+/* ── Right: Floating Control Panel ── */
 .control-panel {
-  flex-shrink: 0;
-  background: #161614;
-  border-left: 1px solid #2C2B28;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  background: rgba(22, 22, 20, 0.82);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+  z-index: 10;
 }
 
 /* Header */

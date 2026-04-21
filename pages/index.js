@@ -89,6 +89,7 @@ export default function Home() {
 
   const handleResizeStart = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsResizing(true);
     const startX = e.clientX;
     const startWidth = panelWidth;
@@ -291,13 +292,13 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── Resize Handle ── */}
-      <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
-        <div className="resize-grip" />
-      </div>
+      {/* ── Right: Floating Control Panel ── */}
+      <div className="control-panel" style={{ width: panelWidth, position: 'absolute' }}>
 
-      {/* ── Right: Control Panel ── */}
-      <div className="control-panel" style={{ width: panelWidth }}>
+        {/* Resize handle on left edge of panel */}
+        <div className={`resize-handle${isResizing ? ' resizing' : ''}`} onMouseDown={handleResizeStart}>
+          <div className="resize-grip" />
+        </div>
 
         {/* Header */}
         <div className="ctrl-header">
