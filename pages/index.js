@@ -270,10 +270,10 @@ export default function Home() {
 
   return (
     <div className="app-shell">
-      <Toast message={toast.message} type={toast.type} visible={toast.visible} />
 
       {/* ── Left: Video Panel ── */}
       <div className="video-panel">
+        <Toast message={toast.message} type={toast.type} visible={toast.visible} />
         {videoSrc ? (
           <video
             ref={videoRef}
