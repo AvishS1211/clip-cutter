@@ -91,12 +91,17 @@ export default function Home() {
   const [downloadStage, setDownloadStage] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
   const [panelWidth, setPanelWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
+
+  // Refs for drag state — avoids stale closures in global mousemove handler
+  const draggingRef = useRef(null); // null | 'playhead' | 'in' | 'out'
+  const inPointRef = useRef(0);
+  const outPointRef = useRef(0);
+  const durationRef = useRef(0);
 
   const showToast = (message, type = 'success') => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -212,21 +217,36 @@ export default function Home() {
 
   const getTimelinePercent = (time) => duration ? (time / duration) * 100 : 0;
 
-  const handleTimelineClick = useCallback((e) => {
-    if (!timelineRef.current || !videoRef.current || !duration) return;
+  // Keep refs in sync so the global mousemove handler always sees fresh values
+  useEffect(() => { inPointRef.current = inPoint; }, [inPoint]);
+  useEffect(() => { outPointRef.current = outPoint; }, [outPoint]);
+  useEffect(() => { durationRef.current = duration; }, [duration]);
+
+  const getTimeFromEvent = (e) => {
+    if (!timelineRef.current) return 0;
     const rect = timelineRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const newTime = (x / rect.width) * duration;
-    videoRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  }, [duration]);
+    return (x / rect.width) * durationRef.current;
+  };
 
+  // Single stable mousemove handler — reads refs, no stale closures
   const handleMouseMove = useCallback((e) => {
-    if (isDragging) handleTimelineClick(e);
-  }, [isDragging, handleTimelineClick]);
+    const type = draggingRef.current;
+    if (!type) return;
+    const time = getTimeFromEvent(e);
+    if (type === 'playhead') {
+      if (videoRef.current) { videoRef.current.currentTime = time; setCurrentTime(time); }
+    } else if (type === 'in') {
+      const clamped = Math.min(Math.max(0, time), outPointRef.current - 0.1);
+      setInPoint(clamped);
+    } else if (type === 'out') {
+      const clamped = Math.max(Math.min(durationRef.current, time), inPointRef.current + 0.1);
+      setOutPoint(clamped);
+    }
+  }, []);
 
   useEffect(() => {
-    const stop = () => setIsDragging(false);
+    const stop = () => { draggingRef.current = null; };
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', stop);
     return () => {
@@ -387,13 +407,29 @@ export default function Home() {
             {/* Timeline */}
             <div className="ctrl-section">
               <div className="time-label" style={{ marginBottom: 10 }}>Timeline</div>
-              <div className="timeline" ref={timelineRef} onMouseDown={(e) => { setIsDragging(true); handleTimelineClick(e); }}>
+              <div className="timeline" ref={timelineRef} onMouseDown={(e) => {
+                if (e.target === timelineRef.current || e.target.classList.contains('timeline-region') || e.target.classList.contains('timeline-progress')) {
+                  draggingRef.current = 'playhead';
+                  const rect = timelineRef.current.getBoundingClientRect();
+                  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                  const t = (x / rect.width) * duration;
+                  if (videoRef.current) { videoRef.current.currentTime = t; setCurrentTime(t); }
+                }
+              }}>
                 {duration > 0 && (
                   <>
                     <div className="timeline-region" style={{ left: `${getTimelinePercent(inPoint)}%`, width: `${getTimelinePercent(outPoint) - getTimelinePercent(inPoint)}%` }} />
                     <div className="timeline-progress" style={{ width: `${getTimelinePercent(currentTime)}%` }} />
-                    <div className="timeline-in" style={{ left: `${getTimelinePercent(inPoint)}%` }} />
-                    <div className="timeline-out" style={{ left: `${getTimelinePercent(outPoint)}%` }} />
+                    <div className="timeline-handle timeline-handle-in"
+                      style={{ left: `${getTimelinePercent(inPoint)}%` }}
+                      onMouseDown={(e) => { e.stopPropagation(); draggingRef.current = 'in'; }}
+                      title="Drag to set In point"
+                    />
+                    <div className="timeline-handle timeline-handle-out"
+                      style={{ left: `${getTimelinePercent(outPoint)}%` }}
+                      onMouseDown={(e) => { e.stopPropagation(); draggingRef.current = 'out'; }}
+                      title="Drag to set Out point"
+                    />
                   </>
                 )}
               </div>
