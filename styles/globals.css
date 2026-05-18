@@ -316,6 +316,69 @@ h1 {
   color: #6B6560; font-variant-numeric: tabular-nums;
 }
 
+/* ── AI Suggestions ── */
+.ai-btn-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ai-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #3D3B37;
+  border-top-color: #CC785C;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.suggestion-card {
+  background: #111110;
+  border: 1px solid #2C2B28;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.suggestion-card:hover {
+  border-color: #CC785C;
+  background: #1a1917;
+}
+
+.suggestion-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #F0EBE3;
+  margin-bottom: 3px;
+}
+
+.suggestion-time {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: #CC785C;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.suggestion-reason {
+  font-size: 11px;
+  color: #6B6560;
+  line-height: 1.5;
+}
+
 /* ── Toast ── */
 .toast {
   position: absolute;

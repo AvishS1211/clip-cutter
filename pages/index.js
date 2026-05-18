@@ -91,6 +91,9 @@ export default function Home() {
   const [downloadStage, setDownloadStage] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const [panelWidth, setPanelWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -256,6 +259,27 @@ export default function Home() {
       window.removeEventListener('mouseup', stop);
     };
   }, [handleMouseMove]);
+
+  const handleAnalyze = async () => {
+    if (!videoSrc) return;
+    setAnalyzing(true);
+    setAnalyzeError('');
+    setSuggestions([]);
+    try {
+      const res = await axios.post('/api/analyze', { path: videoSrc });
+      setSuggestions(res.data.suggestions || []);
+    } catch (err) {
+      setAnalyzeError(err.response?.data?.error || 'Analysis failed');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const applySuggestion = (s) => {
+    setInPoint(s.start);
+    setOutPoint(s.end);
+    seekTo(s.start);
+  };
 
   const handleExportClick = async () => {
     if (!videoSrc) return;
@@ -439,6 +463,46 @@ export default function Home() {
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
+            </div>
+
+            <hr className="divider" />
+
+            {/* AI Suggestions */}
+            <div className="ctrl-section">
+              <div className="time-label" style={{ marginBottom: 10 }}>AI Clip Suggestions</div>
+              <button
+                className="btn btn-ghost"
+                style={{ width: '100%' }}
+                onClick={handleAnalyze}
+                disabled={analyzing}
+              >
+                {analyzing ? (
+                  <span className="ai-btn-loading">
+                    <span className="ai-spinner" /> Analysing video...
+                  </span>
+                ) : '✨ Suggest Clips with AI'}
+              </button>
+              {analyzeError && (
+                <p className="status error" style={{ marginTop: 8 }}>{analyzeError}</p>
+              )}
+              {analyzing && (
+                <p className="status" style={{ marginTop: 8, textAlign: 'center' }}>
+                  Gemini is watching your video — this may take a minute for longer videos.
+                </p>
+              )}
+              {suggestions.length > 0 && (
+                <div className="suggestions-list">
+                  {suggestions.map((s, i) => (
+                    <div key={i} className="suggestion-card" onClick={() => applySuggestion(s)}>
+                      <div className="suggestion-title">{s.title}</div>
+                      <div className="suggestion-time">
+                        {formatTime(s.start)} → {formatTime(s.end)}
+                      </div>
+                      <div className="suggestion-reason">{s.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <hr className="divider" />
