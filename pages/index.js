@@ -239,9 +239,11 @@ export default function Home() {
     } else if (type === 'in') {
       const clamped = Math.min(Math.max(0, time), outPointRef.current - 0.1);
       setInPoint(clamped);
+      if (videoRef.current) { videoRef.current.currentTime = clamped; setCurrentTime(clamped); }
     } else if (type === 'out') {
       const clamped = Math.max(Math.min(durationRef.current, time), inPointRef.current + 0.1);
       setOutPoint(clamped);
+      if (videoRef.current) { videoRef.current.currentTime = clamped; setCurrentTime(clamped); }
     }
   }, []);
 
