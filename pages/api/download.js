@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { analyzeVideo } from '../../lib/analyzeVideo';
 
 const execAsync = promisify(exec);
 const TMP_DIR = '/tmp/clip-cutter-videos';
@@ -109,6 +110,11 @@ export default function handler(req, res) {
       const probe = JSON.parse(stdout);
       const duration = parseFloat(probe.format?.duration || 0);
       send({ success: true, path: `/api/stream?file=${fileName}`, duration, fileName });
+
+      // Fire-and-forget: start AI analysis in background while user watches the video
+      if (process.env.GEMINI_API_KEY) {
+        analyzeVideo(fileName).catch((err) => console.error('[bg analyze]', err));
+      }
     } catch {
       send({ error: 'Failed to read video metadata' });
     }

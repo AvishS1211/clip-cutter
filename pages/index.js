@@ -92,9 +92,10 @@ export default function Home() {
   const [downloadStage, setDownloadStage] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('');
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analyzeError, setAnalyzeError] = useState('');
+  const [suggestStatus, setSuggestStatus] = useState('idle'); // idle | processing | done | error
   const [suggestions, setSuggestions] = useState([]);
+  const [analyzeError, setAnalyzeError] = useState('');
+  const pollRef = useRef(null);
   const [panelWidth, setPanelWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -173,6 +174,9 @@ export default function Home() {
               setVideoSrc(data.path);
               setVideoFileName(data.fileName || '');
               setDuration(data.duration);
+              if (data.fileName && process.env.NEXT_PUBLIC_AI_ENABLED !== 'false') {
+                startPolling(data.fileName);
+              }
               setInPoint(0);
               setOutPoint(data.duration);
               setDownloadStage('');
@@ -252,6 +256,9 @@ export default function Home() {
     }
   }, []);
 
+  // Clean up poll on unmount
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
+
   useEffect(() => {
     const stop = () => { draggingRef.current = null; };
     window.addEventListener('mousemove', handleMouseMove);
@@ -262,19 +269,30 @@ export default function Home() {
     };
   }, [handleMouseMove]);
 
-  const handleAnalyze = async () => {
-    if (!videoSrc) return;
-    setAnalyzing(true);
-    setAnalyzeError('');
+  const startPolling = (fileName) => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    setSuggestStatus('processing');
     setSuggestions([]);
-    try {
-      const res = await axios.post('/api/analyze', { fileName: videoFileName });
-      setSuggestions(res.data.suggestions || []);
-    } catch (err) {
-      setAnalyzeError(err.response?.data?.error || 'Analysis failed');
-    } finally {
-      setAnalyzing(false);
-    }
+    setAnalyzeError('');
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await axios.get(`/api/suggestions?file=${fileName}`);
+        const { status, suggestions: s, error } = res.data;
+        if (status === 'done') {
+          setSuggestions(s || []);
+          setSuggestStatus('done');
+          clearInterval(pollRef.current);
+        } else if (status === 'error') {
+          setAnalyzeError(error || 'Analysis failed');
+          setSuggestStatus('error');
+          clearInterval(pollRef.current);
+        }
+        // status === 'pending' or 'processing' → keep polling
+      } catch {
+        // network hiccup, keep polling
+      }
+    }, 4000);
   };
 
   const applySuggestion = (s) => {
@@ -471,28 +489,22 @@ export default function Home() {
 
             {/* AI Suggestions */}
             <div className="ctrl-section">
-              <div className="time-label" style={{ marginBottom: 10 }}>AI Clip Suggestions</div>
-              <button
-                className="btn btn-ghost"
-                style={{ width: '100%' }}
-                onClick={handleAnalyze}
-                disabled={analyzing}
-              >
-                {analyzing ? (
-                  <span className="ai-btn-loading">
-                    <span className="ai-spinner" /> Analysing video...
-                  </span>
-                ) : '✨ Suggest Clips with AI'}
-              </button>
-              {analyzeError && (
-                <p className="status error" style={{ marginTop: 8 }}>{analyzeError}</p>
-              )}
-              {analyzing && (
-                <p className="status" style={{ marginTop: 8, textAlign: 'center' }}>
-                  Gemini is watching your video — this may take a minute for longer videos.
+              <div className="time-label" style={{ marginBottom: 10 }}>
+                AI Clip Suggestions
+                {suggestStatus === 'processing' && <span className="ai-spinner" style={{ marginLeft: 8 }} />}
+              </div>
+
+              {suggestStatus === 'processing' && (
+                <p className="status" style={{ textAlign: 'center' }}>
+                  Gemini is analysing your video in the background...
                 </p>
               )}
-              {suggestions.length > 0 && (
+
+              {suggestStatus === 'error' && (
+                <p className="status error">{analyzeError}</p>
+              )}
+
+              {suggestStatus === 'done' && suggestions.length > 0 && (
                 <div className="suggestions-list">
                   {suggestions.map((s, i) => (
                     <div key={i} className="suggestion-card" onClick={() => applySuggestion(s)}>
@@ -504,6 +516,10 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {suggestStatus === 'idle' && (
+                <p className="status">Download a video to get AI clip suggestions.</p>
               )}
             </div>
 
