@@ -1,5 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
+import path from 'path';
+
+const TMP_DIR = '/tmp/clip-cutter-videos';
 
 export const config = {
   api: { bodyParser: true, responseLimit: false },
@@ -8,11 +11,14 @@ export const config = {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { path: videoPath } = req.body;
+  const { fileName } = req.body;
 
-  if (!videoPath || !videoPath.startsWith('/tmp/')) {
-    return res.status(400).json({ error: 'Invalid video path' });
+  // Sanitise — only allow simple filenames, no path traversal
+  if (!fileName || fileName.includes('/') || fileName.includes('..') || !fileName.endsWith('.mp4')) {
+    return res.status(400).json({ error: 'Invalid file name' });
   }
+
+  const videoPath = path.join(TMP_DIR, fileName);
 
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server' });

@@ -83,6 +83,7 @@ export default function Home() {
   const [toast, setToast] = useState({ message: '', type: 'success', visible: false });
   const toastTimer = useRef(null);
   const [videoSrc, setVideoSrc] = useState('');
+  const [videoFileName, setVideoFileName] = useState('');
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [inPoint, setInPoint] = useState(0);
@@ -170,6 +171,7 @@ export default function Home() {
             if (data.stage === 'processing') setDownloadStage('processing');
             if (data.success) {
               setVideoSrc(data.path);
+              setVideoFileName(data.fileName || '');
               setDuration(data.duration);
               setInPoint(0);
               setOutPoint(data.duration);
@@ -266,7 +268,7 @@ export default function Home() {
     setAnalyzeError('');
     setSuggestions([]);
     try {
-      const res = await axios.post('/api/analyze', { path: videoSrc });
+      const res = await axios.post('/api/analyze', { fileName: videoFileName });
       setSuggestions(res.data.suggestions || []);
     } catch (err) {
       setAnalyzeError(err.response?.data?.error || 'Analysis failed');
